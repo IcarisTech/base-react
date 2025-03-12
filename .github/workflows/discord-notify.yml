@@ -1,0 +1,29 @@
+name: Discord Notifications
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, closed]
+
+jobs:
+  notify-discord:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Enviar notificación de Push a Discord
+        if: github.event_name == 'push'
+        run: |
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -d "{\"content\": \"Nuevo push en el repositorio: ${GITHUB_REPOSITORY}. Autor: ${GITHUB_ACTOR}. Mensaje del commit: '${{ github.event.head_commit.message }}'\"}" \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+      - name: Enviar notificación de Pull Request a Discord
+        if: github.event_name == 'pull_request'
+        run: |
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -d "{\"content\": \"Nuevo pull request en el repositorio: ${GITHUB_REPOSITORY}. Título: ${GITHUB_EVENT_NAME} por ${GITHUB_ACTOR}\"}" \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}
